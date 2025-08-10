@@ -6,12 +6,11 @@
     <title>AI Chat</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- Gen-1 Dependencies for Markdown, Code Highlighting & Icons -->
+    <!-- 引入一代的功能库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
 <body>
 
@@ -24,6 +23,15 @@
                     <h2 class="page-title-main">角色列表</h2>
                     <div class="header-actions">
                         <button id="add-character-btn" class="header-button">+</button>
+                        <button id="menu-btn" class="header-menu-button"><span class="dot"></span><span class="dot"></span><span class="dot"></span></button>
+                        <!-- 更新后的下拉菜单 -->
+                        <div id="dropdown-menu" class="dropdown-menu">
+                            <div class="dropdown-item" data-target-screen="myDashboard">我的桌面</div>
+                            <div class="dropdown-item" data-target-screen="apiSettings">API 设定</div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" data-action="batch-delete">批量删除</div>
+                            <a href="index.html" target="_blank" class="dropdown-item">关于/说明</a>
+                        </div>
                     </div>
                 </div>
                 <div id="character-list"></div>
@@ -32,15 +40,9 @@
 
             <!-- 角色详情页 -->
             <div id="character-detail-screen" class="screen hidden">
-                <div class="page-header-bar"><button class="back-button"><</button><h2 id="detail-name-header">角色详情</h2></div>
-                <div class="content">
-                    <img id="detail-avatar" src="" alt="Avatar">
-                    <h3 id="detail-name"></h3>
-                    <p id="detail-subtitle"></p>
-                    <div class="btn-group">
-                        <button id="go-to-chat-btn" class="action-button btn-primary">与TA聊天</button>
-                        <button id="go-to-edit-btn" class="action-button btn-secondary">编辑角色设定</button>
-                    </div>
+                <div class="page-header-bar"><button class="back-button"><</button></div>
+                <div class="content"><img id="detail-avatar" src="" alt="Avatar"><h3 id="detail-name"></h3>
+                    <div class="btn-group"><button id="go-to-chat-btn" class="action-button btn-primary">与TA聊天</button><button id="go-to-edit-btn" class="action-button btn-secondary">编辑角色设定</button></div>
                 </div>
             </div>
 
@@ -49,34 +51,35 @@
                 <div class="settings-page">
                     <div class="page-header-bar"><button class="back-button"><</button><h2>编辑角色</h2></div>
                     <form id="character-edit-form">
-                        <div class="profile-header">
-                            <label for="edit-char-avatar-upload" class="profile-pic-container"><img id="edit-char-avatar" src="" alt="头像"></label>
-                            <input type="file" id="edit-char-avatar-upload" class="hidden-upload" accept="image/*">
-                            <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
-                                <label for="edit-char-name">名字</label><input type="text" id="edit-char-name" placeholder="给角色起个名字" required>
-                            </div>
-                        </div>
+                        <div class="profile-header"><label for="edit-char-avatar-upload" class="profile-pic-container"><img id="edit-char-avatar" src="" alt="头像"></label><input type="file" id="edit-char-avatar-upload" class="hidden-upload" accept="image/*"><div class="form-group" style="flex-grow: 1; margin-bottom: 0;"><label for="edit-char-name">名字</label><input type="text" id="edit-char-name" placeholder="给角色起个名字"></div></div>
                         <div class="form-group"><label for="edit-char-subtitle">简介</label><input type="text" id="edit-char-subtitle" placeholder="一句话描述角色"></div>
                         <div class="form-group"><label for="edit-char-setting">AI 系统设定 (System Prompt)</label><textarea id="edit-char-setting" placeholder="定义角色的性格、背景、说话方式等"></textarea></div>
-                        <div class="btn-group">
-                            <button type="submit" class="action-button btn-primary">保存</button>
-                            <button type="button" id="delete-character-btn" class="action-button btn-danger">删除角色</button>
-                        </div>
+                        <div class="btn-group"><button type="submit" class="action-button btn-primary">保存</button><button type="button" id="delete-character-btn" class="action-button btn-danger">删除角色</button></div>
                     </form>
                 </div>
             </div>
 
-            <!-- 聊天界面 -->
+            <!-- 聊天界面 (采用一代结构) -->
             <div id="chat-screen" class="screen hidden">
-                <div class="page-header-bar"><button class="back-button"><</button><h2 id="chat-header-title">与 AI 聊天</h2></div>
-                <div id="chat-history"></div>
-                <form id="chat-form">
+                <div class="page-header-bar">
+                    <button class="back-button"><</button>
+                    <h2 id="chat-header-title">与 AI 聊天</h2>
+                    <button id="clear-history-btn" class="header-button" title="清空对话记录">🗑️</button>
+                </div>
+                <div id="chat-history" class="message-list"></div>
+                <div class="chat-input-area">
                     <input type="text" id="chat-input" placeholder="输入消息..." autocomplete="off">
-                    <button type="submit" id="send-button">➤</button>
-                </form>
+                    <button id="send-btn" class="icon-btn" title="发送"><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
 
-            <!-- API Settings Screen (Fused from Gen-1) -->
+            <!-- “我的”桌面 -->
+            <div id="my-dashboard-screen" class="screen hidden" data-bg-target="dashboard">
+                <div class="page-header-bar"><button class="back-button"><</button><h2>我的桌面</h2></div>
+                <div id="icon-grid"></div>
+            </div>
+            
+            <!-- API Settings Screen (采用一代结构) -->
             <div id="api-settings-screen" class="screen hidden">
                 <div class="settings-page">
                     <div class="page-header-bar"><button class="back-button"><</button><h2>API 设定</h2></div>
@@ -105,28 +108,6 @@
                             <button type="submit" id="save-settings-btn" class="action-button btn-primary">保存设定</button>
                         </div>
                     </form>
-                </div>
-            </div>
-            
-            <!-- Other planned screens -->
-            <div id="my-dashboard-screen" class="screen hidden"><p class="placeholder-text">桌面功能开发中...</p></div>
-            <div id="space-screen" class="screen hidden"><p class="placeholder-text">空间功能开发中...</p></div>
-            <div id="prompts-screen" class="screen hidden"><p class="placeholder-text">提示词功能开发中...</p></div>
-        </div>
-
-        <!-- Floating Action Button (FAB) -->
-        <div id="fab-wrapper">
-            <button id="fab-toggle-btn">❖</button>
-            <div id="fab-panel-container" class="hidden">
-                <div class="fab-panel" id="fab-panel-top">
-                    <button class="panel-button" data-target-screen="myDashboard"><span class="icon">🐱</span><span class="label">桌面</span></button>
-                    <button class="panel-button" data-target-screen="space"><span class="icon">🌌</span><span class="label">空间</span></button>
-                    <button class="panel-button" data-target-screen="apiSettings"><span class="icon">🔌</span><span class="label">API</span></button>
-                </div>
-                <div class="fab-panel" id="fab-panel-bottom">
-                    <button class="panel-button" data-target-screen="prompts"><span class="icon">📜</span><span class="label">提示词</span></button>
-                    <button class="panel-button" data-action="back"><span class="icon"><</span><span class="label">返回</span></button>
-                    <button class="panel-button" data-target-screen="home"><span class="icon">🏠</span><span class="label">主页</span></button>
                 </div>
             </div>
         </div>
