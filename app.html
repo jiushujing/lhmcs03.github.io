@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AI Chat</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Gen-1 Dependencies for Markdown, Code Highlighting & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+
+    <div id="phone-container">
+        <div id="screen-container">
+            <!-- 首页 (角色列表) -->
+            <div id="home-screen" class="screen">
+                <div class="page-header-bar">
+                    <h2 id="batch-delete-header">选择项目</h2>
+                    <h2 class="page-title-main">角色列表</h2>
+                    <div class="header-actions">
+                        <button id="add-character-btn" class="header-button">+</button>
+                    </div>
+                </div>
+                <div id="character-list"></div>
+                <div id="batch-delete-footer"><button id="delete-selected-btn" class="action-button btn-danger">删除选中</button><button id="cancel-delete-btn" class="action-button btn-secondary">取消</button></div>
+            </div>
+
+            <!-- 角色详情页 -->
+            <div id="character-detail-screen" class="screen hidden">
+                <div class="page-header-bar"><button class="back-button"><</button><h2 id="detail-name-header">角色详情</h2></div>
+                <div class="content">
+                    <img id="detail-avatar" src="" alt="Avatar">
+                    <h3 id="detail-name"></h3>
+                    <p id="detail-subtitle"></p>
+                    <div class="btn-group">
+                        <button id="go-to-chat-btn" class="action-button btn-primary">与TA聊天</button>
+                        <button id="go-to-edit-btn" class="action-button btn-secondary">编辑角色设定</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 角色编辑页 -->
+            <div id="character-edit-screen" class="screen hidden">
+                <div class="settings-page">
+                    <div class="page-header-bar"><button class="back-button"><</button><h2>编辑角色</h2></div>
+                    <form id="character-edit-form">
+                        <div class="profile-header">
+                            <label for="edit-char-avatar-upload" class="profile-pic-container"><img id="edit-char-avatar" src="" alt="头像"></label>
+                            <input type="file" id="edit-char-avatar-upload" class="hidden-upload" accept="image/*">
+                            <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+                                <label for="edit-char-name">名字</label><input type="text" id="edit-char-name" placeholder="给角色起个名字" required>
+                            </div>
+                        </div>
+                        <div class="form-group"><label for="edit-char-subtitle">简介</label><input type="text" id="edit-char-subtitle" placeholder="一句话描述角色"></div>
+                        <div class="form-group"><label for="edit-char-setting">AI 系统设定 (System Prompt)</label><textarea id="edit-char-setting" placeholder="定义角色的性格、背景、说话方式等"></textarea></div>
+                        <div class="btn-group">
+                            <button type="submit" class="action-button btn-primary">保存</button>
+                            <button type="button" id="delete-character-btn" class="action-button btn-danger">删除角色</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 聊天界面 -->
+            <div id="chat-screen" class="screen hidden">
+                <div class="page-header-bar"><button class="back-button"><</button><h2 id="chat-header-title">与 AI 聊天</h2></div>
+                <div id="chat-history"></div>
+                <form id="chat-form">
+                    <input type="text" id="chat-input" placeholder="输入消息..." autocomplete="off">
+                    <button type="submit" id="send-button">➤</button>
+                </form>
+            </div>
+
+            <!-- API Settings Screen (Fused from Gen-1) -->
+            <div id="api-settings-screen" class="screen hidden">
+                <div class="settings-page">
+                    <div class="page-header-bar"><button class="back-button"><</button><h2>API 设定</h2></div>
+                    <form id="api-settings-form" onsubmit="return false;">
+                        <div class="api-presets">
+                            <button type="button" id="btn-openai" class="preset-button">兼容OpenAI</button>
+                            <button type="button" id="btn-gemini" class="preset-button">Gemini Key</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="api-url">API 地址 (Base URL)</label>
+                            <input type="text" id="api-url" placeholder="格式参考 https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="api-key">密钥 (API Key)</label>
+                            <input type="password" id="api-key" placeholder="请输入API Key">
+                        </div>
+                        <div class="form-group">
+                            <label for="model-select">选择模型</label>
+                            <select id="model-select">
+                                <optgroup id="openai-models" label="OpenAI / 兼容"></optgroup>
+                                <optgroup id="gemini-models" label="Google Gemini"></optgroup>
+                            </select>
+                        </div>
+                        <button type="button" id="fetch-models-button" class="action-button btn-secondary">拉取模型</button>
+                        <div class="btn-group">
+                            <button type="submit" id="save-settings-btn" class="action-button btn-primary">保存设定</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Other planned screens -->
+            <div id="my-dashboard-screen" class="screen hidden"><p class="placeholder-text">桌面功能开发中...</p></div>
+            <div id="space-screen" class="screen hidden"><p class="placeholder-text">空间功能开发中...</p></div>
+            <div id="prompts-screen" class="screen hidden"><p class="placeholder-text">提示词功能开发中...</p></div>
+        </div>
+
+        <!-- Floating Action Button (FAB) -->
+        <div id="fab-wrapper">
+            <button id="fab-toggle-btn">❖</button>
+            <div id="fab-panel-container" class="hidden">
+                <div class="fab-panel" id="fab-panel-top">
+                    <button class="panel-button" data-target-screen="myDashboard"><span class="icon">🐱</span><span class="label">桌面</span></button>
+                    <button class="panel-button" data-target-screen="space"><span class="icon">🌌</span><span class="label">空间</span></button>
+                    <button class="panel-button" data-target-screen="apiSettings"><span class="icon">🔌</span><span class="label">API</span></button>
+                </div>
+                <div class="fab-panel" id="fab-panel-bottom">
+                    <button class="panel-button" data-target-screen="prompts"><span class="icon">📜</span><span class="label">提示词</span></button>
+                    <button class="panel-button" data-action="back"><span class="icon"><</span><span class="label">返回</span></button>
+                    <button class="panel-button" data-target-screen="home"><span class="icon">🏠</span><span class="label">主页</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
